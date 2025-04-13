@@ -1,156 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nile Server Activation</title>
-  <style>
-    /* Maintain previous UI styles */
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect to TronLink and Switch to Nile Testnet</title>
+    <!-- Load WalletConnect library -->
+    <script src="https://unpkg.com/@walletconnect/client@1.8.0/dist/walletconnect.min.js"></script>
 </head>
 <body>
-  <div class="activation-card">
-    <h1>Nile Asia Server Activation</h1>
-    <p class="instructions">Click below to configure your TronLink connection</p>
-    
-    <button id="activationButton">Initialize Server Connection</button>
-    
-    <div class="fallback" id="fallback">
-      <!-- Detailed manual instructions -->
-    </div>
-  </div>
+    <h1>Switch to Nile Testnet</h1>
+    <p>Click the button below to connect to TronLink and switch to the Nile Testnet.</p>
+    <button id="connectButton">Connect and Switch to Nile Testnet</button>
 
-  <script>
-    (function() {
-      // 1. Cryptographic Constants
-      const NILE_CHAIN_ID = '0x2b6653dc'; // Hex for 728126428
-      const OFFICIAL_CONTRACT = 'TNUC9Qb1rSaSxXzXCViBZDZT6f4cZ6JKEy';
-      const TRONLINK_PACKAGE = 'com.tronlink';
+    <script>
+        // Get the button element
+        const connectButton = document.getElementById('connectButton');
 
-      // 2. Military-Grade Mobile Detection
-      const isMobile = {
-        android: /android|xiaomi|redmi/i.test(navigator.userAgent),
-        ios: /iphone|ipad|ipod/i.test(navigator.userAgent),
-        inAppBrowser: window.tron?.isTronLink,
-        any() { return this.android || this.ios || this.inAppBrowser }
-      };
-
-      // 3. Activation Payload Generator
-      function generatePayload() {
-        return encodeURIComponent(JSON.stringify({
-          contract_address: OFFICIAL_CONTRACT,
-          function_selector: "activate()",
-          parameter: "0x",
-          chainId: NILE_CHAIN_ID,
-          timestamp: Date.now(),
-          origin: window.location.origin
-        }));
-      }
-
-      // 4. Platform-Specific Nuclear Launch Codes
-      const activationStrategies = {
-        android: () => {
-          // Direct intent with certificate verification
-          window.location.href = intent://test.nile/activate#Intent; +
-            package=${TRONLINK_PACKAGE}; +
-            scheme=tronlink; +
-            S.browser_fallback_url=https://nile.tronscan.org; +
-            end;;
-        },
-
-        ios: () => {
-          // Universal Link Fallback System
-          const universalLink = https://nile.tronscan.org/activate?params=${generatePayload()};
-          
-          // First attempt: Standard deeplink
-          window.location.href = tronlink://test.nile/tronlink/tronlink?params=${generatePayload()};
-          
-          // Backup: Iframe with timeout
-          setTimeout(() => {
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = universalLink;
-            document.body.appendChild(iframe);
-            setTimeout(() => document.body.removeChild(iframe), 1000);
-          }, 250);
-        },
-
-        inApp: async () => {
-          try {
-            // Direct API call for in-app browsers
-            await window.tron.request({
-              method: 'tron_switchNetwork',
-              params: [{
-                chainId: NILE_CHAIN_ID,
-                chainName: 'TRON Nile Testnet',
-                nativeCurrency: { name: 'TRX', decimals: 6, symbol: 'TRX' },
-                rpcUrls: ['https://nile.trongrid.io'],
-                blockExplorerUrls: ['https://nile.tronscan.org']
-              }]
+        // Add click event listener to the button
+        connectButton.addEventListener('click', async () => {
+            // Initialize WalletConnect
+            const connector = new WalletConnect({
+                bridge: "https://bridge.walletconnect.org", // WalletConnect bridge server
+                qrcodeModal: {
+                    // Custom handling to open TronLink via deep link
+                    open: (uri) => {
+                        // Deep link to open TronLink with WalletConnect URI
+                        window.location.href = tronlink://wc?uri=${encodeURIComponent(uri)};
+                    },
+                    close: () => {},
+                },
             });
-          } catch (e) {
-            activationStrategies.android();
-          }
-        }
-      };
 
-      // 5. Activation Sequence with Dead Man's Switch
-      async function activateNuclearProtocol() {
-        const button = document.getElementById('activationButton');
-        button.disabled = true;
-        
-        try {
-          // Phase 1: Platform Detection
-          if (isMobile.inAppBrowser) {
-            await activationStrategies.inApp();
-          } else if (isMobile.android) {
-            activationStrategies.android();
-          } else if (isMobile.ios) {
-            activationStrategies.ios();
-          }
-
-          // Phase 2: Activation Confirmation
-          let activationConfirmed = false;
-          const confirmationTimer = setTimeout(() => {
-            if (!activationConfirmed) {
-              throw new Error('Activation timeout');
+            // Create a new session if not already connected
+            if (!connector.connected) {
+                await connector.createSession();
             }
-          }, 3000);
 
-          // Phase 3: Result Verification
-          window.addEventListener('blur', () => {
-            activationConfirmed = true;
-            clearTimeout(confirmationTimer);
-            button.textContent = 'Activation Successful!';
-            button.style.backgroundColor = '#4CAF50';
-          });
+            // Handle connection event
+            connector.on("connect", async (error) => {
+                if (error) {
+                    console.error("Connection error:", error);
+                    return;
+                }
 
-        } catch (error) {
-          console.error('Nuclear Protocol Failed:', error);
-          document.getElementById('fallback').style.display = 'block';
-          button.disabled = false;
-        }
-      }
-
-      // 6. Quantum-Proof Event Listener
-      document.getElementById('activationButton').addEventListener('click', () => {
-        if (!isMobile.any()) {
-          alert('Please use mobile device with TronLink installed');
-          return;
-        }
-        
-        // Initiate Activation Sequence
-        activateNuclearProtocol();
-        
-        // Final Fallback: Redirect to Network Settings
-        setTimeout(() => {
-          if (!document.hidden) {
-            window.location.href = 'https://nile.tronscan.org/#/activate';
-          }
-        }, 3500);
-      });
-
-    })();
-  </script>
+                // Request network switch to Nile Testnet
+                try {
+                    await connector.sendCustomRequest({
+                        method: "wallet_switchEthereumChain",
+                        params: [{
+                            chainId: "0x94A62", // Nile Testnet chain ID (60898 in hex)
+                            chainName: "Nile Testnet",
+                            rpcUrls: ["https://nile.trongrid.io"],
+                            nativeCurrency: {
+                                name: "TRON",
+                                symbol: "TRX",
+                                decimals: 6,
+                            },
+                            blockExplorerUrls: ["https://nile.tronscan.org"],
+                        }],
+                    });
+                    console.log("Network switched to Nile Testnet");
+                } catch (switchError) {
+                    console.error("Network switch error:", switchError);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
